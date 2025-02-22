@@ -1,5 +1,5 @@
 ---
-- hosts: machine
+- hosts: vs01
   collections:
     - ibm.ibm_zos_core
   gather_facts: false
