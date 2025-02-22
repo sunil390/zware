@@ -1,0 +1,87 @@
+---
+- hosts: machine
+  collections:
+    - ibm.ibm_zos_core
+  gather_facts: false
+
+  vars:
+  environment: "{{ environment_vars }}"
+
+  tasks:
+#    - name: Gather z/OS specific facts
+#      zos_gather_facts:
+#      register: zos_facts
+
+#    - name: Display gathered z/OS facts
+#      debug:
+#        var: zos_facts.ansible_facts
+
+    - name: Set Expected SID Values
+      set_fact:
+        system_values:
+          active_css: "1"
+          active_iodf_data_set: "PROV.IODF01"
+          edt_id: "00"
+          ipl_device_current: "{{ ('0DE27', 'Z31VS1') | join(', ') }}"
+          load_parameter: "{{ ('LOADK2', 'SYS0.IPLPARM', '0DE28') | join(', ') }}"
+          system_ipl_time: "{{ ('18.23.48', '02/09/2025') | join(', ') }}"
+          zos_release: "03.02.00"
+
+    - name: Execute an operator command to show IODF config
+      zos_operator:
+        cmd: 'd ios,config'
+        wait_time_s: 0
+      register: result_iodf
+      ignore_errors: yes
+
+    - name: Execute an operator command to show IPL info
+      zos_operator:
+        cmd: 'd iplinfo'
+        wait_time_s: 0
+      register: result_iplinfo
+      ignore_errors: yes
+
+    - name: Validate response before extraction
+      fail:
+        msg: "No valid response received from operator command."
+      when: result_iodf.content is not defined or result_iplinfo.content is not defined
+
+    - name: Extract key-value pairs from response
+      set_fact:
+        extracted_values:
+          active_iodf_data_set: "{{ (result_iodf.content | join(' ') | regex_findall('ACTIVE IODF DATA SET = ([^ ]+)') | first | default('MISSING')) }}"
+          edt_id: "{{ (result_iodf.content | join(' ') | regex_findall('EDT ID = ([^ ]+)') | first | default('MISSING')) }}"
+          active_css: "{{ (result_iodf.content | join(' ') | regex_findall('ACTIVE CSS: *([0-9]+)') | first | default('MISSING')) }}"
+          system_ipl_time: "{{ (result_iplinfo.content | join(' ') | regex_findall('SYSTEM IPLED AT ([0-9\\.]+) ON ([0-9\/]+)') | first | default('MISSING')) | join(', ') }}"
+#          zos_release: "{{ zos_facts.ansible_facts.zos_release | default('MISSING') }}"
+          zos_release: "{{ (result_iplinfo.content | join(' ') | regex_findall('RELEASE z/OS ([^ ]+)') | first | default('N/A')) }}"
+          load_parameter: "{{ (result_iplinfo.content | join(' ') | regex_findall('USED ([^ ]+) IN ([^ ]+) ON ([^ ]+)') | first | default('MISSING')) | join(', ') }}"
+          ipl_device_current: "{{ (result_iplinfo.content | join(' ') | regex_findall('IPL DEVICE:.*?CURRENT\\(([^\\)]+)\\) VOLUME\\(([^\\)]+)\\)') | first | default('MISSING')) | join(', ') }}"
+
+    - name: Validate extracted values - Fail if critical values are missing
+      fail:
+        msg: "Critical value {{ item.key }} could not be extracted!"
+      when: extracted_values[item.key] == "MISSING"
+      loop: "{{ extracted_values | dict2items }}"
+
+    - name: Identify mismatched values
+      set_fact:
+        mismatched_values: "{{ mismatched_values | default({}) | combine({ item.key: {'expected': system_values[item.key], 'extracted': item.value} }) }}"
+      when: system_values[item.key] != item.value
+      loop: "{{ extracted_values | dict2items }}"
+
+    - name: Display Only Mismatched Values
+      debug:
+        msg: "Mismatched values: {{ mismatched_values }}"
+      when: mismatched_values is defined and mismatched_values | length > 0
+
+    - name: Save extracted values to a temporary file on the remote system
+      copy:
+        content: "{{ extracted_values | to_nice_json }}"
+        dest: "/tmp/extracted_values.json"
+
+    - name: Fetch the extracted values file to the local machine
+      fetch:
+        src: "/tmp/extracted_values.json"
+        dest: "./extracted_values.json"
+        flat: yes
