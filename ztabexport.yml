@@ -1,0 +1,65 @@
+---
+- hosts: vs01
+  collections:
+    - ibm.ibm_zos_core
+  gather_facts: false
+
+  vars:
+  environment: "{{ environment_vars }}"
+
+  tasks:
+    - name: Run REXX script
+      zos_tso_command:
+        commands:
+          - EXEC 'IBMUSER.ZNEXT.REXX(ZTESTA)'
+      register: rexx_output
+
+    - name: Display REXX script messages
+      debug:
+        msg: "{{ rexx_output }}"
+
+    - name: Encode from ebcdic to utf
+      zos_encode:
+        src: "/u/ibmuser/MYTABLE.json"
+        dest: "/u/ibmuser/TABLE.json"
+        encoding:
+          from: IBM-1047
+          to: ISO8859-1
+        backup: false
+      register: result_encoding
+
+    - name: Display fetch messages
+      debug:
+        msg: "{{ result_encoding }}"
+
+    - name: Fetch the extracted values file to the local machine
+      fetch:
+        src: "/u/ibmuser/TABLE.json"
+        dest: "./MYTABLE.json"
+        flat: true
+#        encoding:
+#          from: IBM-1047
+#          to: ISO8859-1
+      register: fetch_result
+      ignore_errors: true
+
+    - name: Display fetch messages
+      debug:
+        msg: "{{ fetch_result }}"
+
+    - name: Read JSON file
+      slurp:
+        src: ./MYTABLE.json
+      register: json_content
+      delegate_to: localhost
+
+    - name: Decode JSON content
+      set_fact:
+        mytable_data: "{{ json_content['content'] | b64decode | from_json }}"
+      delegate_to: localhost
+    
+    - name: Write JSON data to a local file
+      copy:
+        content: "{{ mytable_data | to_nice_json }}"  
+        dest: ./mytable_data.json      
+      delegate_to: localhost
