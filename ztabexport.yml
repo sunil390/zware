@@ -61,5 +61,5 @@
     - name: Write JSON data to a local file
       copy:
         content: "{{ mytable_data | to_nice_json }}"  
-        dest: ./mytable_data.json      
+        dest: /var/lib/awx/projects/_|_zware/mytable_data.json      
       delegate_to: localhost
