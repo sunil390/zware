@@ -61,7 +61,10 @@
         dest: ./mytable_data.json
       delegate_to: localhost
       
-    - name: Copy the formatted file back to USS
+    - name: Copy processed data back to DataSet
       zos_copy:
-        src: ./mytable_data.json  
-        dest: ./mytable_data.json
+        src:  ./mytable_data.json 
+        dest: IBMUSER.ZNEXT.DATA(JSON1)
+        encoding:
+          from: UTF-8
+          to: IBM-037
