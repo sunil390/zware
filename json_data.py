@@ -1,0 +1,24 @@
+---
+- hosts: vs01
+  collections:
+    - ibm.ibm_zos_core
+  gather_facts: false
+
+  vars:
+  environment: "{{ environment_vars }}"
+
+  tasks:
+
+    - name: process data from json_content by python
+      script: 
+        executable: python3
+        script: ./json_processor.py
+      delegate_to: localhost
+    
+    - name: Copy processed data back to DataSet
+      zos_copy:
+        src:  ./data.out 
+        dest: IBMUSER.ZNEXT.DATA(DATA1)
+        encoding:
+          from: UTF-8
+          to: IBM-037
