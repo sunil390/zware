@@ -58,14 +58,28 @@
         mytable_data: "{{ json_content['content'] | b64decode | from_json }}"
       delegate_to: localhost
 
-    - name: Determine project directory path
-      command: "echo /var/lib/awx/projects"
-      register: project_dir
+    - name: Get facts about the current project directory
+      stat:
+        path: /var/lib/awx/projects
+      register: project_dir_stat
       delegate_to: localhost
+
+    - name: Find the project directory.
+      find:
+        paths: /var/lib/awx/projects
+        file_type: directory
+        patterns: "\_\d+\_\_{{ awx_project_name }}"
+      register: find_result
+      when: project_dir_stat.stat.exists
+      delegate_to: localhost
+
+    - name: Set the name of the data directory
+      set_fact:
+        project_path: "{{ find_result.files[0].path }}"
 
     - name: Create subdirectory (if it does not exist)
       file:
-        path: "{{ project_dir.stdout }}/config"
+        path: "{{ project_path }}/config"
         state: directory
         mode: '0755'
       delegate_to: localhost
@@ -73,5 +87,5 @@
     - name: Write JSON data to a local file
       copy:
         content: "{{ mytable_data | to_nice_json }}"
-        dest: "{{ project_dir.stdout }}/config/mytable_data.json"    
+        dest: "{{ project_path }}/config/mytable_data.json"
       delegate_to: localhost
