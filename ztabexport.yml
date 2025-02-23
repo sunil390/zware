@@ -60,49 +60,16 @@
 
     - name: Get facts about the current project directory
       stat:
-        path: /var/lib/awx/projects
-      register: project_dir_stat
+        path: /data/config
+      register: project_dir
       delegate_to: localhost
 
-    - name: Display fetch messages
+    - name: Display directory facts
       debug:
-        msg: "{{ project_dir_stat }}"
-
-    - name: Display fetch messages
-      debug:
-        msg: "{{ awx_project_name }}"
-
-    - name: Find the project directory.
-      find:
-        paths: /var/lib/awx/projects
-        file_type: directory
-        patterns: '_\\d+__\{{ awx_project_name }}'
-      register: find_result
-      when: project_dir_stat.stat.exists
-      delegate_to: localhost
-
-    - name: Display fetch messages
-      debug:
-        msg: "{{ find_result }}"
-
-    - name: Set the name of the data directory
-      set_fact:
-        project_path: "{{ find_result.files[0].path }}"
-
-    - name: Create subdirectory (if it does not exist)
-      file:
-        path: "{{ project_path }}/config"
-        state: directory
-        mode: '0755'
-      register: create_result
-      delegate_to: localhost
-
-    - name: Display fetch messages
-      debug:
-        msg: "{{ create_result }}"
+        msg: "{{ project_dir }}"
 
     - name: Write JSON data to a local file
       copy:
         content: "{{ mytable_data | to_nice_json }}"
-        dest: "{{ project_path }}/config/mytable_data.json"
+        dest: "/data/config/mytable_data.json"
       delegate_to: localhost
