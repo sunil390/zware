@@ -64,6 +64,14 @@
       register: project_dir_stat
       delegate_to: localhost
 
+    - name: Display fetch messages
+      debug:
+        msg: "{{ project_dir_stat }}"
+
+    - name: Display fetch messages
+      debug:
+        msg: "{{ awx_project_name }}"
+
     - name: Find the project directory.
       find:
         paths: /var/lib/awx/projects
@@ -72,6 +80,10 @@
       register: find_result
       when: project_dir_stat.stat.exists
       delegate_to: localhost
+
+    - name: Display fetch messages
+      debug:
+        msg: "{{ find_result }}"
 
     - name: Set the name of the data directory
       set_fact:
@@ -82,7 +94,12 @@
         path: "{{ project_path }}/config"
         state: directory
         mode: '0755'
+      register: create_result
       delegate_to: localhost
+
+    - name: Display fetch messages
+      debug:
+        msg: "{{ create_result }}"
 
     - name: Write JSON data to a local file
       copy:
