@@ -10,9 +10,7 @@
   tasks:
 
     - name: process data from json_content by python
-      script: 
-        executable: python3
-        script: ./json_processor.py
+      command: python3 ./json_processor.py      
       delegate_to: localhost
     
     - name: Copy processed data back to DataSet
