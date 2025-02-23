@@ -37,9 +37,6 @@
         src: "/u/ibmuser/TABLE.json"
         dest: "./MYTABLE.json"
         flat: true
-#        encoding:
-#          from: IBM-1047
-#          to: ISO8859-1
       register: fetch_result
       ignore_errors: true
 
@@ -58,18 +55,13 @@
         mytable_data: "{{ json_content['content'] | b64decode | from_json }}"
       delegate_to: localhost
 
-    - name: Get facts about the current project directory
-      stat:
-        path: /data/config
-      register: project_dir
-      delegate_to: localhost
-
-    - name: Display directory facts
-      debug:
-        msg: "{{ project_dir }}"
-
     - name: Write JSON data to a local file
       copy:
         content: "{{ mytable_data | to_nice_json }}"
         dest: "/data/config/mytable_data.json"
       delegate_to: localhost
+      
+    - name: Copy the formatted file back to USS
+      zos_copy:
+        src: ./mytable_data.json  
+        dest: ./mytable_data.json
