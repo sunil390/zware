@@ -68,7 +68,7 @@
       find:
         paths: /var/lib/awx/projects
         file_type: directory
-        patterns: "\_\d+\_\_{{ awx_project_name }}"
+        patterns: '_\\d+__\{{ awx_project_name }}'
       register: find_result
       when: project_dir_stat.stat.exists
       delegate_to: localhost
