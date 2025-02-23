@@ -59,7 +59,7 @@
       delegate_to: localhost
 
     - name: Determine project directory path
-      command: "echo /var/lib/awx/projects/"
+      command: "echo /var/lib/awx/projects"
       register: project_dir
       delegate_to: localhost
 
