@@ -13,7 +13,10 @@ try:
     output_lines = []
     if 'data' in data and isinstance(data['data'], list):
         for item in data['data']:
-            output_lines.append(f"SUBS: {item.get('SUBS', '')}, RSTEP: {item.get('RSTEP', '')}, DATE: {item.get('DATE', '')}, TIME: {item.get('TIME', '')}, LSTAT: {item.get('LSTAT', '')}")
+            if isinstance(item, dict):  # Check if item is a dictionary
+                output_lines.append(f"SUBS: {item.get('SUBS', '')}, RSTEP: {item.get('RSTEP', '')}, DATE: {item.get('DATE', '')}, TIME: {item.get('TIME', '')}, LSTAT: {item.get('LSTAT', '')}")
+            else:
+                print(f"Warning: Skipping non-dictionary item in 'data' list: {item}")
 
     # Write the processed data to the output file
     with open(output_file, 'w') as outfile:
