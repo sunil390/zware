@@ -1,4 +1,5 @@
 /*   rexx */                               
+/* Source : https://github.com/IBM/IBM-Z-zOS/blob/main/zOS-Automation/ISPF-Exporter/rexx-src/ispf2j.rex */
 call syscalls 'ON'                         
 msg_stat = MSG("ON")                       
 /* Constants */                            
