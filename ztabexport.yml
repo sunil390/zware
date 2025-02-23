@@ -68,3 +68,17 @@
         encoding:
           from: UTF-8
           to: IBM-037
+
+    - name: process data from json_content by python
+      script: 
+        executable: python3
+        script: ./json_processor.py
+      delegate_to: localhost
+    
+    - name: Copy processed data back to DataSet
+      zos_copy:
+        src:  ./data.out 
+        dest: IBMUSER.ZNEXT.DATA(DATA1)
+        encoding:
+          from: UTF-8
+          to: IBM-037
