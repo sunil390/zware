@@ -57,9 +57,21 @@
       set_fact:
         mytable_data: "{{ json_content['content'] | b64decode | from_json }}"
       delegate_to: localhost
-    
+
+    - name: Determine project directory path
+      command: "echo /var/lib/awx/projects/"
+      register: project_dir
+      delegate_to: localhost
+
+    - name: Create subdirectory (if it does not exist)
+      file:
+        path: "{{ project_dir.stdout }}/config"
+        state: directory
+        mode: '0755'
+      delegate_to: localhost
+
     - name: Write JSON data to a local file
       copy:
-        content: "{{ mytable_data | to_nice_json }}"  
-        dest: /var/lib/awx/projects/_8__zcode/mytable_data.json      
+        content: "{{ mytable_data | to_nice_json }}"
+        dest: "{{ project_dir.stdout }}/config/mytable_data.json"    
       delegate_to: localhost
