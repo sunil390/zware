@@ -80,7 +80,7 @@
         content: "{{ extracted_values | to_nice_json }}"
         dest: "/tmp/extracted_values.json"
 
-    - name: Fetch the extracted values file to the local machine
+    - name: Fetch the extracted values file to the Controller
       fetch:
         src: "/tmp/extracted_values.json"
         dest: "./extracted_values.json"
