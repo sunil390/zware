@@ -77,6 +77,7 @@
       zos_copy:
         src:  ./data.out 
         dest: IBMUSER.ZNEXT.DATA(DATA1)
+        force: True
         encoding:
           from: UTF-8
           to: IBM-037
