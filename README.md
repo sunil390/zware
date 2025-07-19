@@ -1,5 +1,8 @@
 # zware
 
+## misc Authenticator issue
+1. sudo timedatectl set-ntp true
+
 ## nginx comnfig
 1. sudo dnf install nginx
 
