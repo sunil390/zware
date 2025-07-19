@@ -18,18 +18,23 @@
         job_name: "{{ jobname | upper }}"
       register: job_output_result
 
-    # --- THIS IS THE NEW WORKAROUND ---
-    # We will print the entire job log directly to the Ansible output.
-    # We add start and end markers to make it easy for our Python code to find it.
-    - name: "Display Mainframe Job Output"
+    - name: "Display the ENTIRE Mainframe Job Output"
       ansible.builtin.debug:
         msg: |
           --- BEGIN MAINFRAME JOB LOG ---
           {% if job_output_result.jobs is defined and job_output_result.jobs | length > 0 %}
-          {% for line in job_output_result.jobs[0].ddnames[0].content %}
+          {# THIS IS THE FIX: Loop through each DDNAME (spool file) in the list #}
+          {% for dd in job_output_result.jobs[0].ddnames %}
+
+          --- DDNAME: {{ dd.ddname | default('N/A') }} ---
+          {# Loop through each line of content within that DDNAME #}
+          {% for line in dd.content %}
           {{ line }}
           {% endfor %}
+
+          {% endfor %}
           {% else %}
-          JOB NOT FOUND: No job output found for '{{ jobname | upper }}'.
+          JOB NOT FOUND: No job output found for '{{ jobname | upper }}'. The job may not exist, may have purged, or you may lack permissions to view it.
           {% endif %}
           --- END MAINFRAME JOB LOG ---
+      when: jobname is defined and jobname != ""
