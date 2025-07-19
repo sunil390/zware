@@ -1,9 +1,12 @@
 ---
 - name: Retrieve full job output from JES2 and return to AWX
-  hosts: zos_host
+- hosts: vs01
   collections:
     - ibm.ibm_zos_core
-  gather_facts: no
+  gather_facts: false
+
+  vars:
+  environment: "{{ environment_vars }}"
 
   tasks:
     - name: "Fail if jobname is not provided"
