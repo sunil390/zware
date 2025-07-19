@@ -1,5 +1,8 @@
 # zware
 
+## nginx comnfig
+1. sudo dnf install nginx
+
 ## AWX Minimum Config
 
 1. add Organization
