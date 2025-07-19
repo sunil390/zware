@@ -18,14 +18,14 @@
         job_name: "{{ jobname | upper }}"
       register: job_output_result
 
-    - name: "Check if the job was found"
-      ansible.builtin.fail:
-        msg: "No job found with the name '{{ jobname | upper }}'. The job may not exist, may have purged, or you may lack permissions to view it."
-      when: job_output_result.jobs is not defined or job_output_result.jobs | length == 0
-
-    - name: "Prepare the combined job output for the API response"
+    - name: "Prepare the job output, or a 'not found' message"
       ansible.builtin.set_fact:
-        full_job_log: "{{ job_output_result.jobs[0].ddnames | to_nice_json }}"
+        full_job_log: |
+          {% if job_output_result.jobs is defined and job_output_result.jobs | length > 0 %}
+          {{ job_output_result.jobs[0].ddnames | to_nice_json }}
+          {% else %}
+          JOB NOT FOUND: No job output found for '{{ jobname | upper }}'. The job may not exist, may have purged, or you may lack permissions to view it.
+          {% endif %}
 
     - name: "Return the entire job output as an artifact to AWX"
       ansible.builtin.set_stats:
