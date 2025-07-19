@@ -18,17 +18,18 @@
         job_name: "{{ jobname | upper }}"
       register: job_output_result
 
-    - name: "Prepare the job output, or a 'not found' message"
-      ansible.builtin.set_fact:
-        full_job_log: |
+    # --- THIS IS THE NEW WORKAROUND ---
+    # We will print the entire job log directly to the Ansible output.
+    # We add start and end markers to make it easy for our Python code to find it.
+    - name: "Display Mainframe Job Output"
+      ansible.builtin.debug:
+        msg: |
+          --- BEGIN MAINFRAME JOB LOG ---
           {% if job_output_result.jobs is defined and job_output_result.jobs | length > 0 %}
-          {{ job_output_result.jobs[0].ddnames | to_nice_json }}
+          {% for line in job_output_result.jobs[0].ddnames[0].content %}
+          {{ line }}
+          {% endfor %}
           {% else %}
-          JOB NOT FOUND: No job output found for '{{ jobname | upper }}'. The job may not exist, may have purged, or you may lack permissions to view it.
+          JOB NOT FOUND: No job output found for '{{ jobname | upper }}'.
           {% endif %}
-
-    - name: "Return the entire job output as an artifact to AWX"
-      ansible.builtin.set_stats:
-        data:
-          job_output: "{{ full_job_log }}"
-        per_host: no
+          --- END MAINFRAME JOB LOG ---
