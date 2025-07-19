@@ -1,5 +1,4 @@
 ---
-- name: Retrieve full job output from JES2 and return to AWX
 - hosts: vs01
   collections:
     - ibm.ibm_zos_core
