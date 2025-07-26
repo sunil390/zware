@@ -1,33 +1,34 @@
 ---
-- hosts: vs01
+- name: Fetch Mainframe Syslog using ZOAU pcon
+  hosts: vs01
+  gather_facts: no
   collections:
     - ibm.ibm_zos_core
-  gather_facts: false
 
+  # The environment variable is now mandatory and must be passed from the AWX
+  # Job Template, for example, as an empty dictionary '{}' if no vars are needed.
   vars:
-  environment: "{{ environment_vars }}"
+    environment: "{{ environment_vars }}"
 
   tasks:
     # ----------------------------------------------------------------------
-    # STEP 1: Get the current epoch time directly from the mainframe host.
-    # This is the crucial step to avoid timezone discrepancies.
+    # STEP 1: Get date string from mainframe by executing a pre-existing script.
     # ----------------------------------------------------------------------
-    - name: Get current epoch time from the mainframe
+    - name: Get current date string from mainframe by executing date.sh
       ibm.ibm_zos_core.zos_script:
-        cmd: "./date.sh" # This USS command returns the current epoch time
+        cmd: "./date.sh"
         executable: /bin/sh
       register: mainframe_time_raw
 
     # ----------------------------------------------------------------------
-    # STEP 2: Calculate the start time epoch using the time we just fetched.
+    # STEP 2: Parse the date string and calculate the start epoch.
     # ----------------------------------------------------------------------
-    - name: Calculate the start time epoch based on the host's time
+    - name: Parse date string and calculate the start time epoch
       set_fact:
-        # Use the stdout from the previous command, which is the host's epoch time.
-        start_epoch: "{{ (mainframe_time_raw.stdout | int) - (hours_ago | int) * 3600 }}"
+        start_epoch: "{{ ((mainframe_time_raw.stdout | to_datetime('%a %b %d %H:%M:%S  %Y')).strftime('%s') | int) - (hours_ago | int) * 3600 }}"
 
     # ----------------------------------------------------------------------
-    # STEP 3: Format start time into the formats required by pcon: YYDDD and hhmmss.
+    # STEP 3: Format the calculated start time for the pcon command.
     # ----------------------------------------------------------------------
     - name: Format start date and time for the pcon command
       set_fact:
@@ -35,25 +36,39 @@
         start_time_hhmmss: "{{ '%H%M%S' | strftime(start_epoch) }}"
 
     # ----------------------------------------------------------------------
-    # STEP 4: Construct and execute the full pcon shell command.
+    # STEP 4: Create a temporary pcon script on the controller and copy it to the host.
     # ----------------------------------------------------------------------
-    - name: Construct the full pcon shell command string
-      set_fact:
-        pcon_command: "pcon -s {{ start_date_yyddd }} {{ start_time_hhmmss }}"
+    - name: Create and copy a temporary pcon script to the mainframe
+      ibm.ibm_zos_core.zos_copy:
+        content: |
+          #!/bin/sh
+          pcon -s {{ start_date_yyddd }} {{ start_time_hhmmss }}
+        dest: "/tmp/pcon_temp.sh"
+        mode: '0755'
+      register: copy_result
 
-    - name: Display the exact command that will be executed
-      debug:
-        msg: "Executing USS command: {{ pcon_command }}"
-
-    - name: Execute the pcon command to retrieve log content
+    # ----------------------------------------------------------------------
+    # STEP 5: Execute the newly created pcon_temp.sh script on the host.
+    # ----------------------------------------------------------------------
+    - name: Execute the temporary pcon script to retrieve log content
       ibm.ibm_zos_core.zos_script:
-        cmd: "{{ pcon_command }}"
+        cmd: "{{ copy_result.dest }}"
+        executable: /bin/sh
       register: pcon_script_output
 
     # ----------------------------------------------------------------------
-    # STEP 5: Set the captured stdout as a job artifact for the AWX client.
+    # STEP 6: Clean up the temporary script from the host.
+    # ----------------------------------------------------------------------
+    - name: Remove temporary script from the mainframe
+      ibm.ibm_zos_core.zos_file:
+        path: "{{ copy_result.dest }}"
+        state: absent
+
+    # ----------------------------------------------------------------------
+    # STEP 7: Set the captured stdout as a job artifact for the AWX client.
     # ----------------------------------------------------------------------
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
-          log_content: "{{ pcon_script_output.stdout }}"
+          log_content: "{{ pcon_script_output.stdout }}"```
+
