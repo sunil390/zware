@@ -9,31 +9,32 @@
 
   tasks:
     # ----------------------------------------------------------------------
-    # STEP 1: Calculate the start time from which to begin fetching logs.
-    # We get the current time (epoch), subtract the requested hours,
-    # and use that as our starting point.
+    # STEP 1: Get the current epoch time directly from the mainframe host.
+    # This is the crucial step to avoid timezone discrepancies.
     # ----------------------------------------------------------------------
-    - name: Get current time and calculate the start time epoch
-      set_fact:
-        # Calculate the start time by subtracting the requested hours from the current epoch time
-        start_epoch: "{{ (ansible_date_time.epoch | int) - (hours_ago | int) * 3600 }}"
+    - name: Get current epoch time from the mainframe
+      ibm.ibm_zos_core.zos_command:
+        cmd: "date +%s" # This USS command returns the current epoch time
+      register: mainframe_time_raw
 
     # ----------------------------------------------------------------------
-    # STEP 2: Format the calculated start time into the specific formats
-    # required by the 'pcon -s' command: YYDDD and hhmmss.
+    # STEP 2: Calculate the start time epoch using the time we just fetched.
+    # ----------------------------------------------------------------------
+    - name: Calculate the start time epoch based on the host's time
+      set_fact:
+        # Use the stdout from the previous command, which is the host's epoch time.
+        start_epoch: "{{ (mainframe_time_raw.stdout | int) - (hours_ago | int) * 3600 }}"
+
+    # ----------------------------------------------------------------------
+    # STEP 3: Format start time into the formats required by pcon: YYDDD and hhmmss.
     # ----------------------------------------------------------------------
     - name: Format start date and time for the pcon command
       set_fact:
-        # Format for YYDDD (e.g., 25198 for the 198th day of 2025)
-        # %y = Year without century, %j = Day of year as a zero-padded decimal
         start_date_yyddd: "{{ '%y%j' | strftime(start_epoch) }}"
-        
-        # Format for hhmmss (e.g., 143000 for 2:30 PM)
-        # %H = Hour (24-hour clock), %M = Minute, %S = Second
         start_time_hhmmss: "{{ '%H%M%S' | strftime(start_epoch) }}"
 
     # ----------------------------------------------------------------------
-    # STEP 3: Construct the full shell command and execute it using zos_script.
+    # STEP 4: Construct and execute the full pcon shell command.
     # ----------------------------------------------------------------------
     - name: Construct the full pcon shell command string
       set_fact:
@@ -49,10 +50,9 @@
       register: pcon_script_output
 
     # ----------------------------------------------------------------------
-    # STEP 4: Set the captured stdout as a job artifact for the AWX client.
+    # STEP 5: Set the captured stdout as a job artifact for the AWX client.
     # ----------------------------------------------------------------------
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
-          # The entire log output from the pcon command is in the 'stdout' field
           log_content: "{{ pcon_script_output.stdout }}"
