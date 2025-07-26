@@ -1,0 +1,58 @@
+---
+- hosts: DCUF
+  collections:
+    - ibm.ibm_zos_core
+  gather_facts: false
+
+  vars:
+  environment: "{{ environment_vars }}"
+
+  tasks:
+    # ----------------------------------------------------------------------
+    # STEP 1: Calculate the start time from which to begin fetching logs.
+    # We get the current time (epoch), subtract the requested hours,
+    # and use that as our starting point.
+    # ----------------------------------------------------------------------
+    - name: Get current time and calculate the start time epoch
+      set_fact:
+        # Calculate the start time by subtracting the requested hours from the current epoch time
+        start_epoch: "{{ (ansible_date_time.epoch | int) - (hours_ago | int) * 3600 }}"
+
+    # ----------------------------------------------------------------------
+    # STEP 2: Format the calculated start time into the specific formats
+    # required by the 'pcon -s' command: YYDDD and hhmmss.
+    # ----------------------------------------------------------------------
+    - name: Format start date and time for the pcon command
+      set_fact:
+        # Format for YYDDD (e.g., 25198 for the 198th day of 2025)
+        # %y = Year without century, %j = Day of year as a zero-padded decimal
+        start_date_yyddd: "{{ '%y%j' | strftime(start_epoch) }}"
+        
+        # Format for hhmmss (e.g., 143000 for 2:30 PM)
+        # %H = Hour (24-hour clock), %M = Minute, %S = Second
+        start_time_hhmmss: "{{ '%H%M%S' | strftime(start_epoch) }}"
+
+    # ----------------------------------------------------------------------
+    # STEP 3: Construct the full shell command and execute it using zos_script.
+    # ----------------------------------------------------------------------
+    - name: Construct the full pcon shell command string
+      set_fact:
+        pcon_command: "pcon -s {{ start_date_yyddd }} {{ start_time_hhmmss }}"
+
+    - name: Display the exact command that will be executed
+      debug:
+        msg: "Executing USS command: {{ pcon_command }}"
+
+    - name: Execute the pcon command to retrieve log content
+      ibm.ibm_zos_core.zos_script:
+        cmd: "{{ pcon_command }}"
+      register: pcon_script_output
+
+    # ----------------------------------------------------------------------
+    # STEP 4: Set the captured stdout as a job artifact for the AWX client.
+    # ----------------------------------------------------------------------
+    - name: Set the log content as a job artifact for AWX
+      set_stats:
+        data:
+          # The entire log output from the pcon command is in the 'stdout' field
+          log_content: "{{ pcon_script_output.stdout }}"
