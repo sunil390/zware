@@ -70,5 +70,5 @@
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
-          log_content: "{{ pcon_script_output.stdout }}"```
+          log_content: "{{ pcon_script_output.stdout }}"
 
