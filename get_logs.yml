@@ -13,8 +13,9 @@
     # This is the crucial step to avoid timezone discrepancies.
     # ----------------------------------------------------------------------
     - name: Get current epoch time from the mainframe
-      ibm.ibm_zos_core.zos_command:
-        cmd: "date +%s" # This USS command returns the current epoch time
+      ibm.ibm_zos_core.zos_script:
+        cmd: "date" # This USS command returns the current epoch time
+        executable: /bin/sh
       register: mainframe_time_raw
 
     # ----------------------------------------------------------------------
