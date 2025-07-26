@@ -14,7 +14,7 @@
     # ----------------------------------------------------------------------
     - name: Get current epoch time from the mainframe
       ibm.ibm_zos_core.zos_script:
-        cmd: "date" # This USS command returns the current epoch time
+        cmd: "./date.sh" # This USS command returns the current epoch time
         executable: /bin/sh
       register: mainframe_time_raw
 
