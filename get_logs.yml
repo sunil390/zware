@@ -6,20 +6,22 @@
     - ibm.ibm_zos_core
   environment: "{{ environment_vars }}"
   tasks:
-    - name: Execute Date command and convert output to UTF-8
-      ansible.builtin.shell: "date | iconv -f ibm-1047 -t iso8859-1"
-      register: mainframe_time_raw
+    - name: Get current epoch time directly from the mainframe
+      ansible.builtin.shell: "date +%s"
+      register: mainframe_epoch_raw
 
-    - name: Parse date string and calculate the start time epoch
+    - name: Calculate the start time epoch
       set_fact:
-        start_epoch: "{{ ((mainframe_time_raw.stdout | to_datetime('%a %b %d %H:%M:%S  %Y')).strftime('%s') | int) - (hours_ago | int) * 3600 }}"
+        # Calculates the start epoch by subtracting hours from the mainframe's current epoch
+        start_epoch: "{{ (mainframe_epoch_raw.stdout | int) - (hours_ago | int) * 3600 }}"
 
-    - name: Create pcon command 
-      ansible.builtin.shell: "pcon -s {{ '%y%j' | strftime(start_epoch) }} {{ '%H:%M:%S' | strftime(start_epoch) }} | iconv -f ibm-1047 -t iso8859-1 "
+    - name: Create and execute pcon command using mainframe-local time formatting
+      # The z/OS 'date -r' command formats the epoch time using the system's local timezone
+      # The resulting 'YYJJJ HH:MM:SS' string is then passed to pcon as a single argument
+      ansible.builtin.shell: "pcon -s \"$(date -r {{ start_epoch }} +'%y%j %H:%M:%S')\" | iconv -f ibm-1047 -t iso8859-1"
       register: pcon_script_output
 
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
           log_content: "{{ pcon_script_output.stdout }}"
-
