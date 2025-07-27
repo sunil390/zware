@@ -7,7 +7,7 @@
   environment: "{{ environment_vars }}"
   tasks:
     - name: Get current epoch time directly from the mainframe
-      ansible.builtin.shell: "date +%s"
+      ansible.builtin.shell: "date -cu "
       register: mainframe_epoch_raw
 
     - name: Calculate the start time epoch
