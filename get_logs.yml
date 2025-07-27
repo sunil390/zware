@@ -15,7 +15,7 @@
         start_epoch: "{{ ((mainframe_time_raw.stdout | to_datetime('%a %b %d %H:%M:%S  %Y')).strftime('%s') | int) - (hours_ago | int) * 3600 }}"
 
     - name: Create pcon command 
-      ansible.builtin.shell: "pcon -s \"{{ '%y%j' | strftime(start_epoch) }} {{ '%H:%M:%S' | strftime(start_epoch) }}\" | iconv -f ibm-1047 -t iso8859-1 "
+      ansible.builtin.shell: "pcon -s {{ '%y%j' | strftime(start_epoch) }} {{ '%H:%M:%S' | strftime(start_epoch) }} | iconv -f ibm-1047 -t iso8859-1 "
       register: pcon_script_output
 
     - name: Set the log content as a job artifact for AWX
