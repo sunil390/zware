@@ -1,24 +1,16 @@
----
 - name: Fetch Mainframe Syslog using ZOAU pcon
   hosts: vs01
   gather_facts: no
   collections:
     - ibm.ibm_zos_core
   environment: "{{ environment_vars }}"
+  vars:
+    # Define the number of hours to go back.
+    # This can be easily changed or overridden by an extra variable in AWX.
+    hours_ago: 2
   tasks:
-    - name: Get current epoch time directly from the mainframe
-      ansible.builtin.shell: "date -cu "
-      register: mainframe_epoch_raw
-
-    - name: Calculate the start time epoch
-      set_fact:
-        # Calculates the start epoch by subtracting hours from the mainframe's current epoch
-        start_epoch: "{{ (mainframe_epoch_raw.stdout | int) - (hours_ago | int) * 3600 }}"
-
-    - name: Create and execute pcon command using mainframe-local time formatting
-      # The z/OS 'date -r' command formats the epoch time using the system's local timezone
-      # The resulting 'YYJJJ HH:MM:SS' string is then passed to pcon as a single argument
-      ansible.builtin.shell: "pcon -s \"$(date -r {{ start_epoch }} +'%y%j %H:%M:%S')\" | iconv -f ibm-1047 -t iso8859-1"
+    - name: "Fetch the last {{ hours_ago }} hour(s) of syslog"
+      ansible.builtin.shell: "pcon -t {{ hours_ago | int * 60 }} | iconv -f ibm-1047 -t iso8859-1"
       register: pcon_script_output
 
     - name: Set the log content as a job artifact for AWX
