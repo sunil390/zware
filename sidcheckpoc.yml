@@ -3,19 +3,8 @@
   collections:
     - ibm.ibm_zos_core
   gather_facts: false
-
-  vars:
   environment: "{{ environment_vars }}"
-
   tasks:
-#    - name: Gather z/OS specific facts
-#      zos_gather_facts:
-#      register: zos_facts
-
-#    - name: Display gathered z/OS facts
-#      debug:
-#        var: zos_facts.ansible_facts
-
     - name: Set Expected SID Values
       set_fact:
         system_values:
