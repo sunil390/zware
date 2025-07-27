@@ -5,70 +5,83 @@
   collections:
     - ibm.ibm_zos_core
 
-  # The environment variable is now mandatory and must be passed from the AWX
-  # Job Template, for example, as an empty dictionary '{}' if no vars are needed.
   vars:
+    # This makes the environment_vars variable mandatory.
     environment: "{{ environment_vars }}"
 
   tasks:
     # ----------------------------------------------------------------------
-    # STEP 1: Get date string from mainframe by executing a pre-existing script.
+    # PRE-STEP: Create date.sh script on the CONTROLLER.
     # ----------------------------------------------------------------------
-    - name: Get current date string from mainframe by executing date.sh
+    - name: Create date.sh script locally on the controller
+      ansible.builtin.copy:
+        content: |
+          #!/bin/sh
+          date
+        dest: "/tmp/date_temp.sh" # A temporary file on the AWX node
+        mode: '0755'
+      # This task runs on the controller, not the mainframe
+      delegate_to: localhost
+
+    # ----------------------------------------------------------------------
+    # STEP 1: Execute the LOCAL date.sh on the HOST using zos_script.
+    # zos_script will copy /tmp/date_temp.sh to the host, run it, and clean it up.
+    # ----------------------------------------------------------------------
+    - name: Execute local date.sh script on the mainframe
       ibm.ibm_zos_core.zos_script:
-        cmd: "./date.sh"
+        cmd: "/tmp/date_temp.sh" # Path to the script on the controller
         executable: /bin/sh
       register: mainframe_time_raw
 
     # ----------------------------------------------------------------------
-    # STEP 2: Parse the date string and calculate the start epoch.
+    # STEP 2: On the CONTROLLER, parse the date string from the host.
     # ----------------------------------------------------------------------
     - name: Parse date string and calculate the start time epoch
       set_fact:
         start_epoch: "{{ ((mainframe_time_raw.stdout | to_datetime('%a %b %d %H:%M:%S  %Y')).strftime('%s') | int) - (hours_ago | int) * 3600 }}"
 
     # ----------------------------------------------------------------------
-    # STEP 3: Format the calculated start time for the pcon command.
+    # STEP 3: On the CONTROLLER, create a new script containing the full pcon command.
+    # This directly implements your instruction.
     # ----------------------------------------------------------------------
-    - name: Format start date and time for the pcon command
-      set_fact:
-        start_date_yyddd: "{{ '%y%j' | strftime(start_epoch) }}"
-        start_time_hhmmss: "{{ '%H%M%S' | strftime(start_epoch) }}"
-
-    # ----------------------------------------------------------------------
-    # STEP 4: Create a temporary pcon script on the controller and copy it to the host.
-    # ----------------------------------------------------------------------
-    - name: Create and copy a temporary pcon script to the mainframe
-      ibm.ibm_zos_core.zos_copy:
+    - name: Create pcon command script locally on the controller
+      ansible.builtin.copy:
         content: |
           #!/bin/sh
-          pcon -s {{ start_date_yyddd }} {{ start_time_hhmmss }}
-        dest: "/tmp/pcon_temp.sh"
+          pcon -s {{ '%y%j' | strftime(start_epoch) }} {{ '%H%M%S' | strftime(start_epoch) }}
+        dest: "/tmp/pcon_command_to_run.sh" # Temporary file on the AWX node
         mode: '0755'
-      register: copy_result
+      # This task runs on the controller
+      delegate_to: localhost
+      register: pcon_script_local
 
     # ----------------------------------------------------------------------
-    # STEP 5: Execute the newly created pcon_temp.sh script on the host.
+    # STEP 4: Execute the LOCAL pcon script on the HOST using zos_script.
+    # zos_script will copy /tmp/pcon_command_to_run.sh to the host, run it, and clean it up.
     # ----------------------------------------------------------------------
-    - name: Execute the temporary pcon script to retrieve log content
+    - name: Execute the local pcon command script on the mainframe
       ibm.ibm_zos_core.zos_script:
-        cmd: "{{ copy_result.dest }}"
+        cmd: "{{ pcon_script_local.dest }}" # Use the path to the script on the controller
         executable: /bin/sh
       register: pcon_script_output
 
     # ----------------------------------------------------------------------
-    # STEP 6: Clean up the temporary script from the host.
-    # ----------------------------------------------------------------------
-    - name: Remove temporary script from the mainframe
-      ibm.ibm_zos_core.zos_file:
-        path: "{{ copy_result.dest }}"
-        state: absent
-
-    # ----------------------------------------------------------------------
-    # STEP 7: Set the captured stdout as a job artifact for the AWX client.
+    # STEP 5: Set the captured stdout as a job artifact for the AWX client.
     # ----------------------------------------------------------------------
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
           log_content: "{{ pcon_script_output.stdout }}"
 
+    # ----------------------------------------------------------------------
+    # POST-STEP: Clean up temporary scripts from the CONTROLLER.
+    # ----------------------------------------------------------------------
+    - name: Clean up temporary scripts from the controller
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      # This task runs on the controller
+      delegate_to: localhost
+      loop:
+        - "/tmp/date_temp.sh"
+        - "{{ pcon_script_local.dest }}"
