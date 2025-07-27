@@ -4,11 +4,7 @@
   gather_facts: no
   collections:
     - ibm.ibm_zos_core
-
-  vars:
-    # This makes the environment_vars variable mandatory.
-    environment: "{{ environment_vars }}"
-
+  environment: "{{ environment_vars }}"
   tasks:
     # ----------------------------------------------------------------------
     # PRE-STEP: Create date.sh script on the CONTROLLER.
