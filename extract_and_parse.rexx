@@ -1,5 +1,4 @@
-#!/usr/lpp/ixm/bin/rexx
-/* REXX */
+/* rexx */
 /*--------------------------------------------------------------------*/
 /* This script extracts data from the z/OS 3.1 SDSF DASH panel      */
 /* and immediately parses it to display clean Key:Value pairs.      */
