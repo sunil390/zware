@@ -39,7 +39,7 @@
           --- END MAINFRAME JOB LOG ---
       when: jobname is defined and jobname != ""
 
-    - name: Set the log content as a job artifact for AWX
+    - name: Set the job content as a job artifact for AWX
       set_stats:
         data:
           job_content: "{{ job_output_result }}"
