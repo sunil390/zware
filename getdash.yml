@@ -6,7 +6,7 @@
   environment: "{{ environment_vars }}"
   tasks:
     - name: "Fetch the dash Output"
-      ansible.builtin.shell: "./extract_and_parse.rexx" | iconv -f ibm-1047 -t iso8859-1"
+      ansible.builtin.shell: "./extract_and_parse.rexx | iconv -f ibm-1047 -t iso8859-1"
       register: dash_script_output
 
     - name: Set the dash content as an artifact for AWX
