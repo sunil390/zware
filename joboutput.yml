@@ -42,4 +42,4 @@
     - name: Set the log content as a job artifact for AWX
       set_stats:
         data:
-          log_content: "{{ job_output_result }}"
+          job_content: "{{ job_output_result }}"
