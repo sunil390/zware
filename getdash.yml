@@ -1,0 +1,15 @@
+- name: Fetch Mainframe sdsf dashboard data
+  hosts: vs01
+  gather_facts: no
+  collections:
+    - ibm.ibm_zos_core
+  environment: "{{ environment_vars }}"
+  tasks:
+    - name: "Fetch the dash Output"
+      ansible.builtin.shell: "./extract_and_parse.rexx" | iconv -f ibm-1047 -t iso8859-1"
+      register: dash_script_output
+
+    - name: Set the dash content as an artifact for AWX
+      set_stats:
+        data:
+          dash_content: "{{ dash_script_output.stdout }}"
