@@ -1,0 +1,201 @@
+{
+  "name": "AWX Job Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://awx.znext.com/api/v2/job_templates/15/launch/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"extra_vars\": {\n    \"jobname\": \"{{ $json.jobname }}\"\n  }\n}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "504b661b-1fa0-4ebb-8711-5df44e653708",
+      "name": "Launch AWX Job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -304,
+        80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "khIauZOFPf5ITqlA",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://awx.znext.com/api/v2/jobs/{{ $items('Launch AWX Job')[0].json.job }}/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "621798d2-8d91-4b7c-8ab6-5874bce4c4b8",
+      "name": "Check Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        80,
+        80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "khIauZOFPf5ITqlA",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "successful,failed,error,canceled",
+              "operation": "notContains",
+              "value2": "={{ $json.status }}"
+            }
+          ]
+        }
+      },
+      "id": "952c663a-ba6c-4fda-96e4-1e9ecfdc9358",
+      "name": "Is Job Still Running?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        272,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "51510e2d-f0ff-43bb-adac-d5d447430ccd",
+      "name": "Wait 10s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        80
+      ],
+      "webhookId": "26107fbd-8683-4f7d-9265-3ae5ff5154b6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the first job from the input data\nconst job = items[0].json.artifacts.job_content.jobs[0];\n\n// Initialize an empty string to hold all the log content\nlet fullLogContent = \"\";\n\n// Check if the ddnames array exists and has items\nif (job && job.ddnames && job.ddnames.length > 0) {\n  \n  // Loop through each ddname object (e.g., JESMSGLG, JESJCL)\n  for (const dd of job.ddnames) {\n    \n    // Add a clear header for each log section\n    fullLogContent += `\\n--- START OF DDNAME: ${dd.ddname} ---\\n`;\n    \n    // Check if the content array exists for this ddname\n    if (dd.content && dd.content.length > 0) {\n      // Join all the lines of the content array into a single string with newlines\n      fullLogContent += dd.content.join('\\n');\n    }\n    \n    fullLogContent += `\\n--- END OF DDNAME: ${dd.ddname} ---\\n`;\n  }\n}\n\n// Return a new object with the fully combined and formatted log text\nreturn [{\n  json: {\n    fullLog: fullLogContent\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        96
+      ],
+      "id": "9f4d842d-735d-4771-be0b-647bfdbd0bd6",
+      "name": "Format Log for AI"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "jobname"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        80
+      ],
+      "id": "08df90df-ad25-49b8-84b9-3e3e5b32721f",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Launch AWX Job": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Job Status": {
+      "main": [
+        [
+          {
+            "node": "Is Job Still Running?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Job Still Running?": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Log for AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Check Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Launch AWX Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "09f699ab-5e28-49d1-8677-7b72ced8c662",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "090404b9ae0c2b496bbe0e0eb1d7655865af9c61f4544e516c9d3109dd9ac1ea"
+  },
+  "id": "9ThrB76mNmt4eIox",
+  "tags": []
+}

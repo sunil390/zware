@@ -1,0 +1,190 @@
+{
+  "name": "AWX Log Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://awx.znext.com/api/v2/job_templates/16/launch/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "5c3ec273-b47a-4e37-a5c8-1c3d462f8589",
+      "name": "Launch AWX Job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -304,
+        80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "khIauZOFPf5ITqlA",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://awx.znext.com/api/v2/jobs/{{ $items('Launch AWX Job')[0].json.job }}/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "id": "8019b48b-c3c2-4757-91d1-781c4d59e822",
+      "name": "Check Job Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        80,
+        80
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "khIauZOFPf5ITqlA",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "successful,failed,error,canceled",
+              "operation": "notContains",
+              "value2": "={{ $json.status }}"
+            }
+          ]
+        }
+      },
+      "id": "6ec60862-6b28-45e3-b98b-c1c186664a51",
+      "name": "Is Job Still Running?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        272,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
+      "id": "0bf25727-9754-410f-a6da-1410dfd9fa65",
+      "name": "Wait 10s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        80
+      ],
+      "webhookId": "6891d927-220e-43e7-912f-fab88f35b868"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        80
+      ],
+      "id": "e88069a9-8ca1-41d8-9467-ce8f343c368a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the log content string directly from the input data.\nconst logContent = items[0].json.artifacts.log_content;\n\n// Return a new object containing the extracted log.\n// We'll keep the output variable name 'fullLog' for consistency.\nreturn [{\n  json: {\n    fullLog: logContent\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        96
+      ],
+      "id": "af95bdb6-e07a-44c8-9eb4-ac3142632483",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Launch AWX Job": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Job Status": {
+      "main": [
+        [
+          {
+            "node": "Is Job Still Running?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Job Still Running?": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Check Job Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Launch AWX Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2f0df3cd-b0a8-4ec5-ae40-77f27c4a00e8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "090404b9ae0c2b496bbe0e0eb1d7655865af9c61f4544e516c9d3109dd9ac1ea"
+  },
+  "id": "xOnxV0fhrsOGNBsp",
+  "tags": []
+}
