@@ -1,5 +1,10 @@
 # zware
 
+## n8n
+
+1. podman volume create n8n_data
+2. podman run -it --rm --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE="false" -e TZ="Asia/Kolkata" -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true -e N8N_RUNNERS_ENABLED=true -e DB_SQLITE_POOL_SIZE=2 -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+   
 ## misc Authenticator issue
 1. sudo timedatectl set-ntp true
 
