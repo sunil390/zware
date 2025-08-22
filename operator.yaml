@@ -1,0 +1,11 @@
+
+
+
+
+
+    - name: Execute an operator command to show IPL info
+      zos_operator:
+        cmd: 'd iplinfo'
+        wait_time_s: 0
+      register: result_iplinfo
+      ignore_errors: yes
