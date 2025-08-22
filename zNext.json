@@ -1,0 +1,301 @@
+{
+  "name": "zNext",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fbbda6d8-5093-4409-9a99-df2cf316aae3",
+      "name": "When chat message received",
+      "webhookId": "62b70bca-a96e-43df-96e8-a34ac8a3e915"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "af81ceed-18ef-42c7-a147-3efce104dd1a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        208
+      ],
+      "id": "754939e9-37f5-436d-bffc-e33f44db66c0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "k7Wh7k8jgMQLel2J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "This will download the last one hour syslog from mainframe and summarize on these points\n- summarize key issues \n- abends, warnings, errors, alerts or critial messages\n- pending WTOR messages\n- any STC issues\n- any unusal messages",
+        "workflowId": {
+          "__rl": true,
+          "value": "EM1FQWjgG0mVVZej",
+          "mode": "list",
+          "cachedResultName": "AWX Log Extractor"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        224
+      ],
+      "id": "82510719-f8dd-4067-ab18-da81197fb45c",
+      "name": "syslog extractor"
+    },
+    {
+      "parameters": {
+        "description": "call this tool to get\n- the latest health status of mainframe\n- cpu utilization\n- csa , sqa utilization\n- top spool users\n- top csa sqa users\n- ziip utilization\n- a complete summary of key system metrics",
+        "workflowId": {
+          "__rl": true,
+          "value": "PP8i9OZRectOsIn5",
+          "mode": "list",
+          "cachedResultName": "AWX System Health"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        224
+      ],
+      "id": "aa39fa48-d9bf-43e8-893d-b8f716b1f93a",
+      "name": "System Health"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to run a job in Ansible AWX by its jobname and get a summary of the log output. It requires the 'jobname' as a parameter.\nInclude these in the analysis :-\n- An overall Summary\n- Explanation of the Abend\n- Detailed steps along with guardrails to fix the issue\n\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "dTc8naEX5lQtvMcy",
+          "mode": "list",
+          "cachedResultName": "AWX Job Extractor"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "jobname": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('jobname', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "jobname"
+          ],
+          "schema": [
+            {
+              "id": "jobname",
+              "displayName": "jobname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        224
+      ],
+      "id": "e6bdd455-6b1f-402d-9cec-7d6bb09c9fcf",
+      "name": "get Job Status"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        224
+      ],
+      "id": "f96e9089-d439-48a4-ad58-a04e6ec3a535",
+      "name": "Chat Memory"
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to start and stop started tasks or subsystems in mainframe. It requires two parameters \"action\" and the \"task\". \nInclude these in the output :-\n- whether the task has been started or stopped successfully\n- analyze the output for any issues in the start or stop\n- Detailed steps along with guardrails if there is any issue",
+        "workflowId": {
+          "__rl": true,
+          "value": "w3R4UGrSYfGd9a8R",
+          "mode": "list",
+          "cachedResultName": "Mainframe Operator"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('action', `Valid Values are \"Start\" , \"Stop\",  \"Cancel\" or \"Display\".`, 'string') }}",
+            "task": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('task', `value of task must be less than 8 characters. This could be a task, mainframe subsystem, job or a parameter. `, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "action",
+              "displayName": "action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "task",
+              "displayName": "task",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        224
+      ],
+      "id": "c3882dc4-a0e9-4837-8ca0-08c46d18428b",
+      "name": "Operator"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "syslog extractor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "System Health": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get Job Status": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "21e4d2c2-af2c-4993-949c-339d679df63c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "70a7d4a07cf9aa4293312c0b455e281043a173313bd0a7103a892e394c275a89"
+  },
+  "id": "0sIY5zhgQvGD8yRZ",
+  "tags": []
+}
