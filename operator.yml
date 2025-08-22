@@ -1,11 +1,21 @@
-
-
-
-
-
-    - name: Execute an operator command to show IPL info
+- name: Mainframe Operator
+  hosts: vs01
+  gather_facts: no
+  collections:
+    - ibm.ibm_zos_core
+  environment: "{{ environment_vars }}"
+  vars:
+    action : "{{ action }}"
+    task : "{{ task }}"
+  tasks:
+    - name: Issue Operator Command and Capture Output
       zos_operator:
-        cmd: 'd iplinfo'
+        cmd: '"{{ action }}" "{{ task }}"'
         wait_time_s: 0
-      register: result_iplinfo
+      register: operator_output
       ignore_errors: yes
+
+    - name: Set the operator content as a job artifact for AWX
+      set_stats:
+        data:
+          ops_content: "{{ operator_output.content }}"
