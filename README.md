@@ -3,7 +3,7 @@
 ## n8n
 
 1. podman volume create n8n_data
-2. openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -out ./n8n/tls.crt -keyout ./n8n/tls.key -subj "/CN=n8n/O=n8n" -addext "subjectAltName = DNS:n8n"
+2. openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -out ./n8n/tls.crt -keyout ./n8n/tls.key -subj "/CN=n8n/O=n8n" -addext "subjectAltName = DNS:n8n,IP:192.168.2.226"
 3. chmod 644 ./n8n/tls.crt
 4. chmod 644 ./n8n/tls.key
 5. kubectl get services -A
