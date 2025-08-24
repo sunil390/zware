@@ -4,9 +4,9 @@
 
 1. podman volume create n8n_data
 2. openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -out ./n8n/tls.crt -keyout ./n8n/tls.key -subj "/CN=n8n/O=n8n" -addext "subjectAltName = DNS:n8n"
-3. podman run -it --rm --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE="false" -e TZ="Asia/Kolkata" -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true -e N8N_RUNNERS_ENABLED=true -e DB_SQLITE_POOL_SIZE=2 -e N8N_SSL_CERT=./n8n/tls.crt -e N8N_SSL_KEY=./n8n/tls.key -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+3. podman run -it --rm --name n8n -p 5678:5678 -e N8N_SECURE_COOKIE="false" -e TZ="Asia/Kolkata" -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true -e N8N_RUNNERS_ENABLED=true -e DB_SQLITE_POOL_SIZE=2 -e N8N_SSL_CERT=./certs/tls.crt -e N8N_SSL_KEY=./certs/tls.key -v ./n8n:/certs:Z -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
 4. kubectl get services -A
-5. podman run -it --rm --name n8n -p 5678:5678 --add-host awx.znext.com:10.43.154.140 -e N8N_SECURE_COOKIE="false" -e TZ="Asia/Kolkata" -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true -e N8N_RUNNERS_ENABLED=true -e DB_SQLITE_POOL_SIZE=2 -e N8N_SSL_CERT=./n8n/tls.crt -e N8N_SSL_KEY=./n8n/tls.key -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
+5. podman run -it --rm --name n8n -p 5678:5678 --add-host awx.znext.com:10.43.154.140 -e N8N_SECURE_COOKIE="false" -e TZ="Asia/Kolkata" -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true -e N8N_RUNNERS_ENABLED=true -e DB_SQLITE_POOL_SIZE=2 -e N8N_SSL_CERT=./certs/tls.crt -e N8N_SSL_KEY=./certs/tls.key -v ./n8n:/certs:Z -v n8n_data:/home/node/.n8n docker.n8n.io/n8nio/n8n
    
 ## misc Authenticator issue
 1. sudo timedatectl set-ntp true
