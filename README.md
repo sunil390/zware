@@ -1,5 +1,11 @@
 # zware
 
+## n8n self hosted AI on AMD with nvidia 3070
+1. git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
+2. cd self-hosted-ai-starter-kit
+3. cp .env.example .env # only postgress passwords changed.
+4. docker compose --profile gpu-nvidia up
+
 ## n8n
 
 1. podman volume create n8n_data
