@@ -1,21 +1,29 @@
 # zware
 
-## PgVector Creation
+## PgVector Creation 
 
-1. sudo -i -u postgres
-2. psql
-3. CREATE ROLE rag_user WITH LOGIN PASSWORD 'Sunil390@rag';
-4. CREATE DATABASE rag_knowledge_db OWNER rag_user;
-5. \c rag_knowledge_db
-6. CREATE EXTENSION IF NOT EXISTS vector;
-7. \dx vector
-8. \q
-9. exit
-10. sudo nano /var/lib/pgsql/17/data/pg_hba.conf
-11. host rag_knowledge_db rag_user 0.0.0.0/0 scram-sha-256
-12. sudo systemctl restart postgresql-17
+1. sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$(rpm -E %{rhel})-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+2. sudo dnf -qy module disable postgresql
+3. sudo dnf install pgvector_17
+4. sudo /usr/pgsql-17/bin/postgresql-17-setup initdb
+5. sudo systemctl start postgresql-17
+6. sudo systemctl enable postgresql-17
+7. sudo -i -u postgres
+8. psql
+9. CREATE ROLE rag_user WITH LOGIN PASSWORD 'Sunil390@rag';
+10. CREATE DATABASE rag_knowledge_db OWNER rag_user;
+11. \c rag_knowledge_db
+12. CREATE EXTENSION IF NOT EXISTS vector;
+13. \dx vector
+14. \q
+15. exit
+16. sudo nano /var/lib/pgsql/17/data/pg_hba.conf
+17. host rag_knowledge_db rag_user 0.0.0.0/0 scram-sha-256
+18. sudo systemctl restart postgresql-17
+19. host.containers.internal if running under systemd and n8n is under podman
 
-## PGvector Refresh
+
+## PGvector Refresh 
 1. sudo -i -u postgres
 2. psql
 3. \c rag_knowledge_db
