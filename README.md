@@ -2,7 +2,7 @@
 
 ## ollama granite3.3:8b 
 1. curl -fsSL https://ollama.com/install.sh | sh
-2. ollama run ibm/granite3.3:8b
+2. ollama run ibm/granite3.3:2b
 3. ollama pull ibm/granite-embedding:278m
 4. in n8n Change base url to http://host.docker.external:11434 if in same host or http://192.168.2.80:11434 if run outside.
 
