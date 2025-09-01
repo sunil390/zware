@@ -1,5 +1,26 @@
 # zware
 
+## PgVector Creation
+
+1. sudo -i -u postgres
+2. psql
+3. CREATE ROLE rag_user WITH LOGIN PASSWORD 'Sunil390@rag';
+4. CREATE DATABASE rag_knowledge_db OWNER rag_user;
+5. \c rag_knowledge_db
+6. CREATE EXTENSION IF NOT EXISTS vector;
+7. \dx vector
+8. \q
+9. exit
+10. sudo nano /var/lib/pgsql/17/data/pg_hba.conf
+11. host rag_knowledge_db rag_user 0.0.0.0/0 scram-sha-256
+12. sudo systemctl restart postgresql-17
+
+## PGvector Refresh
+1. sudo -i -u postgres
+2. psql
+3. \c rag_knowledge_db
+4. DROP TABLE n8n_vectors CASCADE;
+
 ## ollama granite3.3:8b 
 1. curl -fsSL https://ollama.com/install.sh | sh
 2. ollama run ibm/granite3.3:2b
