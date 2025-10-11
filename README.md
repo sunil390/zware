@@ -34,6 +34,7 @@
 2. ollama run ibm/granite3.3:2b
 3. ollama pull ibm/granite-embedding:278m
 4. in n8n Change base url to http://host.docker.external:11434 if in same host or http://192.168.2.80:11434 if run outside.
+5. selfhosted n8n with AI http://host.docker.internal:11434 to connect to ollama
 
 ## n8n self hosted AI on AMD with nvidia 3070
 1. git clone https://github.com/n8n-io/self-hosted-ai-starter-kit.git
