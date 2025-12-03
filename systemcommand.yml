@@ -1,0 +1,19 @@
+---
+- hosts: vs01
+  collections:
+    - ibm.ibm_zos_core
+  gather_facts: no
+  vars:
+  environment: "{{ environment_vars }}"
+
+  tasks:
+
+    - name: Execute an operator command to show active jobs
+      zos_operator:
+            cmd: 'd symbols'        
+            wait_time_s: 0
+      register: result
+ 
+    - name: Response for Console Command
+      debug:
+        msg: "{{ result }}"

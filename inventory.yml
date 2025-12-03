@@ -1,0 +1,6 @@
+source_system:
+  hosts:
+    vs01:
+      ansible_host: 192.168.2.44
+      ansible_user: ibmuser
+      ansible_python_interpreter: "/usr/lpp/IBM/cyp/v3r11/pyz/bin/python3.11"
