@@ -13,3 +13,7 @@
       set_stats:
         data:
           dash_content: "{{ dash_script_output.stdout }}"
+    
+    - name: Display output
+      debug:
+        msg: "{{ dash_script_output.stdout }}"
