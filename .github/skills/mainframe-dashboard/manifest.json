@@ -1,0 +1,16 @@
+{
+  "name": "mainframe-dashboard",
+  "version": "1.0.0",
+  "actions": [
+    {
+      "name": "fetch_dashboard",
+      "description": "Runs the getdash.yml playbook to retrieve SDSF metrics.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target_host": { "type": "string", "default": "vs01" }
+        }
+      }
+    }
+  ]
+}
