@@ -4,8 +4,9 @@ description: Expert guidance on safely using the z/OS Dynamic LNKLST facility, i
 ---
 
 # z/OS Dynamic LNKLST Management
-
+Reference : https://www.ibm.com/support/pages/node/879235
 This skill provides procedures and safety guidelines for managing the z/OS Dynamic LNKLST facility using `SETPROG` commands. It is intended for system programmers performing actions such as adding libraries, recataloging, deleting, or renaming data sets within an active LNKLST.
+
 
 ## Key Concepts
 
