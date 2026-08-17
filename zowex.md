@@ -9,7 +9,7 @@
     Zowe Release Version: v3.6.0
     ```
 4.  Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0 (if ssh is missing)
-5.  Get-Content $env:USERPROFILE\.ssh\id_rsa.pub | ssh mfuser@ip "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+5.  Get-Content "$env:USERPROFILE\.ssh\id_rsa.pub" | ssh MFUser@ip "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
 6.  zowe plugins show-first-steps zowex-for-zowe-cli
 7.  zowe config init (enter hostip, userid, password)
 8.  zowe zssh server install
