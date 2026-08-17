@@ -2,7 +2,7 @@
 
 ## zowex minimum setup 14th August 2026
 
-1.  npm install -g @zowe/cli@zowe-v3-lt
+1.  npm install -g @zowe/cli@zowe-v3-lts
 2.  zowe plugins install zowex-for-zowe-cli-0.8.0.tgz
     ```sh
     CLI Version: 8.35.2
