@@ -1,5 +1,16 @@
 # zowex
 
+## Console issue command zoweax setup 28th Aug 2026
+1. scp zowe-server-0.9.0.pax.Z user@ip:/u/user/
+2. pax -ppx -rf zowe-server-0.9.0.pax.Z
+3. cp zoweax /usr/lpp/zowex/bin/zoweax
+4. chown USER:GROUP /usr/lpp/zowex/bin/zoweax
+5. chmod 750 /usr/lpp/zowex/bin/zoweax
+6. extattr +ap /usr/lpp/zowex/bin/zoweax
+7. extattr -s  /usr/lpp/zowex/bin/zoweax
+8. ls -E /usr/lpp/zowex/bin/zoweax
+9. /usr/lpp/zowex/bin/zoweax console issue "D T"
+
 ## zowex minimum setup 14th August 2026
 
 1.  npm install -g @zowe/cli@zowe-v3-lts
