@@ -17,7 +17,22 @@
 10. extattr -s  /usr/lpp/zowex/bin/zoweax
 11. ls -E /usr/lpp/zowex/bin/zoweax
 12. /usr/lpp/zowex/bin/zoweax console issue "D T"
-13. zowe zowex issue console-command "D IPLINFO" --server-path "/usr/lpp/zowex/bin"
+13. code .\zowe.config.json
+```sh
+        "ssh": {
+            "type": "ssh",
+            "properties": {
+                "port": 22,
+                "host": "192.168.2.44",
+                "rejectUnauthorized": false,
+                "serverPath": "/usr/lpp/zowex/bin"
+            },
+            "secure": [
+                "user"
+            ]
+        },
+```
+14. zowe zowex issue console-command "D IPLINFO" --server-path "/usr/lpp/zowex/bin"
 
 ## zowex minimum setup 14th August 2026
 
