@@ -9,13 +9,15 @@
 2. zowe plugins install zowex-for-zowe-cli-0.9.0.tgz
 3. scp zowe-server-0.9.0.pax.Z user@ip:/u/user/
 4. pax -ppx -rf zowe-server-0.9.0.pax.Z
-5. cp zoweax /usr/lpp/zowex/bin/zoweax
-6. chown USER:GROUP /usr/lpp/zowex/bin/zoweax
-7. chmod 750 /usr/lpp/zowex/bin/zoweax
-8. extattr +ap /usr/lpp/zowex/bin/zoweax
-9. extattr -s  /usr/lpp/zowex/bin/zoweax
-10. ls -E /usr/lpp/zowex/bin/zoweax
-11. /usr/lpp/zowex/bin/zoweax console issue "D T"
+5. cp zowex /usr/lpp/zowex/bin
+6. cp zoweax /usr/lpp/zowex/bin/zoweax
+7. chown USER:GROUP /usr/lpp/zowex/bin/zoweax
+8. chmod 750 /usr/lpp/zowex/bin/zoweax
+9. extattr +ap /usr/lpp/zowex/bin/zoweax
+10. extattr -s  /usr/lpp/zowex/bin/zoweax
+11. ls -E /usr/lpp/zowex/bin/zoweax
+12. /usr/lpp/zowex/bin/zoweax console issue "D T"
+13. zowe zowex issue console-command "D IPLINFO" --server-path "/usr/lpp/zowex/bin"
 
 ## zowex minimum setup 14th August 2026
 
