@@ -1,22 +1,22 @@
 # zowex
 
-## Console issue command zoweax setup 28th Aug 2026
+## Console issue command zoweax setup 28th Aug 2026 - Updated to 1.0.0 on 5th Sept.
 1. npm install -g @zowe/cli@zowe-v3-lts
     ```sh
-    CLI Version: 8.36.0
+    CLI Version: 8.36.1
     Zowe Release Version: v3.6.0
     ```
-2. zowe plugins install zowex-for-zowe-cli-0.9.0.tgz
-3. scp zowe-server-0.9.0.pax.Z user@ip:/u/user/
-4. pax -ppx -rf zowe-server-0.9.0.pax.Z
-5. cp zowex /usr/lpp/zowex/bin
-6. cp zoweax /usr/lpp/zowex/bin/zoweax
-7. chown USER:GROUP /usr/lpp/zowex/bin/zoweax
-8. chmod 750 /usr/lpp/zowex/bin/zoweax
-9. extattr +ap /usr/lpp/zowex/bin/zoweax
-10. extattr -s  /usr/lpp/zowex/bin/zoweax
-11. ls -E /usr/lpp/zowex/bin/zoweax
-12. /usr/lpp/zowex/bin/zoweax console issue "D T"
+2. zowe plugins install zowex-for-zowe-cli-1.0.0.tgz
+3. scp zowe-server-1.0.0.pax.Z user@ip:/u/user/
+4. pax -ppx -rf zowe-server-1.0.0.pax.Z
+5. cp zo /usr/lpp/zo/bin
+6. cp zoa /usr/lpp/zo/bin/zoa
+7. chown USER:GROUP /usr/lpp/zo/bin/zoa
+8. chmod 750 /usr/lpp/zo/bin/zoa
+9. extattr +ap /usr/lpp/zo/bin/zoa
+10. extattr -s  /usr/lpp/zo/bin/zoa
+11. ls -E /usr/lpp/zo/bin/zoa
+12. /usr/lpp/zo/bin/zoa console issue "D T"
 13. code .\zowe.config.json
 ```sh
         "ssh": {
@@ -25,14 +25,14 @@
                 "port": 22,
                 "host": "192.168.2.44",
                 "rejectUnauthorized": false,
-                "serverPath": "/usr/lpp/zowex/bin"
+                "serverPath": "/usr/lpp/zoa/bin"
             },
             "secure": [
                 "user"
             ]
         },
 ```
-14. zowe zowex issue console-command "D IPLINFO" --server-path "/usr/lpp/zowex/bin"
+14. zowe zo issue console-command "D IPLINFO" --server-path "/usr/lpp/zo/bin"
 
 ## zowex minimum setup 14th August 2026
 
