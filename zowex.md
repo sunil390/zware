@@ -1,7 +1,7 @@
 # zowex
 
 ## Rexx Execution from USS 6th Sept 2026
-1. owe zo issue tso "BPXBATCH SH /u/ibmuser/extract_and_parse.rexx > /u/ibmuser/sdsf.out1 2>&1" --sp '/usr/lpp/zo/bin'
+1. zowe zo issue tso "BPXBATCH SH /u/ibmuser/extract_and_parse.rexx > /u/ibmuser/sdsf.out1 2>&1" --sp '/usr/lpp/zo/bin'
 
 ## Console issue command zoweax setup 28th Aug 2026 - Updated to 1.0.0 on 5th Sept.
 1. npm install -g @zowe/cli@zowe-v3-lts
