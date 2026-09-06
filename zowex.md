@@ -2,6 +2,25 @@
 
 ## Rexx Execution from USS 6th Sept 2026
 1. zowe zo issue tso "BPXBATCH SH /u/ibmuser/extract_and_parse.rexx > /u/ibmuser/sdsf.out1 2>&1" --sp '/usr/lpp/zo/bin'
+2. Note: in VSCODE setting "Ctrl + P" search for "Insert Final Newline" and enable it. Without this rexx code saved through vscode in unix files will throw these error
+```sh
+IBMUSER : /u/ibmuser : > ./sdsf_sysp.rexx
+BPXW0003I Improper text file
+BPXW0000I Exec not found
+
+IBMUSER : /u/ibmuser : > ls -l sdsf_sysp_test.rexx sdsf_sysp.rexx                                                           
+-rwx------   1 BPXROOT  SYS1        1440 Sep  6 19:29 sdsf_sysp.rexx                                                        
+-rwx------   1 BPXROOT  SYS1        1441 Sep  6 19:30 sdsf_sysp_test.rexx                                                   
+
+IBMUSER : /u/ibmuser : > cmp -l sdsf_sysp.rexx sdsf_sysp_test.rexx                                                          
+cmp: EOF on sdsf_sysp.rexx                                                                                                  
+
+After enabling "Insert Final Newline" in VSCOde and saving the file.                                                                                                                           
+IBMUSER : /u/ibmuser : > ls -l sdsf_sysp_test.rexx sdsf_sysp.rexx                                                           
+-rwx------   1 BPXROOT  SYS1        1441 Sep  6 20:01 sdsf_sysp.rexx                                                        
+-rwx------   1 BPXROOT  SYS1        1441 Sep  6 19:30 sdsf_sysp_test.rexx                                                   
+                                                                                   
+```
 
 ## Console issue command zoweax setup 28th Aug 2026 - Updated to 1.0.0 on 5th Sept.
 1. npm install -g @zowe/cli@zowe-v3-lts
