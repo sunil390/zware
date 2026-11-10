@@ -1,4 +1,4 @@
-# zowex
+# zowe/zo zopen (erstwhile zowex)
 
 ## Rexx, Python or shell script command line execution from non mainframe platforms for integration with AI Agents 11th Nov 2026
 
