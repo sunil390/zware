@@ -1,5 +1,40 @@
 # zowex
 
+## Rexx, Python or shell script command line execution from non mainframe platforms for integration with AI Agents 11th Nov 2026
+
+1. install node.js
+2. npm install -g @zowe/cli@zowe-v3-lts
+3. zowe plugins install zowex-for-zowe-cli-1.1.0.tgz (download from GitHub zowe/zo )
+4. scp zowe-server-1.1.0.pax.Z user@ip:/u/user/ (download from zowe/zo )
+5. pax -ppx -rf zowe-server-1.1.0.pax.Z
+6. cp zo ~/.zowe-server
+7. cp zoa ~/.zowe-server (For console access)
+8. extattr +ap ~/.zowe-server/zoa
+9. extattr -s  ~/.zowe-server/zoa
+10. zowe config init (enter hostname, username and password of the mainframe against the prompts)
+11. copy zowe.config.json and zowe.schema.json to .zowe folder inside repo root for vscode usage
+12. code .\zowe.config.json
+```sh
+        "ssh": {
+            "type": "ssh",
+            "properties": {
+                "port": 22,
+                "host": "< ip address >",
+                "rejectUnauthorized": false,
+                "serverPath": "~/.zowe-server"
+            },
+            "secure": [
+                "user"
+            ]
+        },
+``` 
+13. add to path in .profile
+```sh
+export PATH=$PATH:/u/<user>/.zowe-server
+```
+14. zowe ssh issue command "zo system"
+
+
 ## Rexx Execution from USS 6th Sept 2026
 1. zowe zo issue tso "BPXBATCH SH /u/ibmuser/extract_and_parse.rexx > /u/ibmuser/sdsf.out1 2>&1" --sp '/usr/lpp/zo/bin'
 2. Note: in VSCODE setting "Ctrl + P" search for "Insert Final Newline" and enable it. Without this rexx code saved through vscode in unix files will throw these error
